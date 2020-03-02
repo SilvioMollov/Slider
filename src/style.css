@@ -5,9 +5,10 @@
 }
 
 .carousel-container {
-    width: 100vh;
+    width: 150vh;
     margin: auto;
     border: 5px solid black;
+    overflow: hidden;
 }
 
 

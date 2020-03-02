@@ -6,8 +6,8 @@ let parentElement = document.querySelector(".carousel-container");
 const sliderContainer = document.querySelector(".carousel-slide");
 const sliderImages = document.querySelectorAll(".carousel-slide img");
 
-let sliderImagesArr = Array.from(sliderImages)
-console.log(sliderImagesArr)
+let sliderImagesArr = Array.from(sliderImages);
+console.log(sliderImagesArr);
 
 let numImg = sliderImages.length;
 console.log(numImg);
@@ -61,16 +61,20 @@ toggleArrows();
 // sliderContainer.style.transform = 'translateX(' + (-imgSize) + 'px'
 
 function autoPlay() {
-    if (parentElement.dataset.autoplay === "true") {
-      for (let i = 0; i < numImg - 1; i++) {
-          setTimeout(() => {
-            counter++;
-            sliderContainer.style.transform = "translateX(" + -imgSize * counter + "px";
-          }, 5000)
-      }
-       
+  if (parentElement.dataset.autoplay === "true") {
+    for (var i = 0; i < sliderImages.length ; i++) {
+      slide(i)
+      console.log("sliding1")
     }
-  
+
+    function slide(i) {
+      setTimeout(function() {
+        slideRight()
+        infinityToFirst()
+        console.log("sliding..")
+      }, 2000 * i);
+    }
+  }
 }
 
 autoPlay();
