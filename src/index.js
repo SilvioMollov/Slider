@@ -13,7 +13,7 @@ let numImg = sliderImages.length;
 console.log(numImg);
 
 let counter = 0;
-const imgSize = sliderImages[0].clientWidth;
+const imgSize = -sliderImages[0].clientWidth;
 
 function toggleArrows() {
   if (parentElement.dataset.arrows === "true") {
@@ -26,7 +26,7 @@ function toggleArrows() {
 
       const prevButton = document.getElementById("arrow-left");
       prevButton.addEventListener("click", () => {
-        slideLeft();
+        slidingOn(-1)
         infinityToLast();
       });
     }
@@ -46,7 +46,7 @@ function toggleArrows() {
       nextButton.addEventListener("click", () => {
         console.log(" length " + sliderImages[counter]);
 
-        slideRight();
+        slidingOn(1)
         infinityToFirst();
       });
     }
@@ -62,16 +62,16 @@ toggleArrows();
 
 function autoPlay() {
   if (parentElement.dataset.autoplay === "true") {
-    for (var i = 0; i < sliderImages.length ; i++) {
-      slide(i)
-      console.log("sliding1")
+    for (var i = 0; i < sliderImages.length; i++) {
+      slide(i);
+      console.log("sliding1");
     }
 
     function slide(i) {
       setTimeout(function() {
-        slideRight()
-        infinityToFirst()
-        console.log("sliding..")
+        slidingOn(1)
+        infinityToFirst();
+        console.log("sliding..");
       }, 2000 * i);
     }
   }
@@ -79,22 +79,35 @@ function autoPlay() {
 
 autoPlay();
 
-function slideRight() {
-  sliderContainer.style.transition = "transform 0.4s ease-in-out";
-  counter++;
-  sliderContainer.style.transform = "translateX(" + -imgSize * counter + "px";
-  console.log(sliderContainer.style.transform);
-  console.log(counter);
-}
+// function slideRight() {
+//   sliderContainer.style.transition = "transform 0.4s ease-in-out";
+//   dir++;
+//   sliderContainer.style.transform = "translateX(" + imgSize * dir + "px";
+//   console.log(sliderContainer.style.transform);
+//   console.log(dir);
+// }
 
-function slideLeft() {
+// function slideLeft() {
+//   sliderContainer.style.transition = "transform 0.4s ease-in-out";
+//   counter--;
+//   sliderContainer.style.transform = "translateX(" + imgSize * counter + "px";
+//   const transformStyle = sliderContainer.style.transform;
+//   const translateX = +transformStyle.replace(/[^\d.]/g, "");
+//   console.log(translateX);
+//   console.log(counter);
+// }
+
+function slidingOn(count) {
   sliderContainer.style.transition = "transform 0.4s ease-in-out";
-  counter--;
-  sliderContainer.style.transform = "translateX(" + -imgSize * counter + "px";
-  const transformStyle = sliderContainer.style.transform;
-  const translateX = +transformStyle.replace(/[^\d.]/g, "");
-  console.log(translateX);
-  console.log(counter);
+  if ((count == 1)) {
+    counter++;
+    sliderContainer.style.transform = "translateX(" + imgSize * counter + "px";
+    
+  } else if (count == -1) {
+    counter--;
+    sliderContainer.style.transform = "translateX(" + imgSize * counter + "px";
+
+  }
 }
 
 // function infinityToFirst() {

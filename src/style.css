@@ -8,7 +8,7 @@
     width: 150vh;
     margin: auto;
     border: 5px solid black;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 
@@ -27,26 +27,24 @@
 
 
 #arrow-left {
-    width: 150px;
-    height: 150px;
+    
     position: absolute;
     top: 50%;
     z-index: 10;
     left: 5%;
-    font-size: 30px;
+    font-size: 50px;
     color: black;
     opacity: 0.5;
     cursor: pointer;
 }
 
 #arrow-right {
-    width: 150px;
-    height: 150px;
+   
     position: absolute;
     top: 50%;
     z-index: 10;
     right: 5%;
-    font-size: 30px;
+    font-size: 50px;
     color: black;
     opacity: 0.5;
     cursor: pointer;
