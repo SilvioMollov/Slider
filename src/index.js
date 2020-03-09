@@ -2,139 +2,105 @@ import "./style.css";
 import "./../node_modules/@fortawesome/fontawesome-free/css/all.css";
 // import printMe from "./print.js";
 // let theFirstChild = parentElement.firstChild;
-let parentElement = document.querySelector(".carousel-container");
-const sliderContainer = document.querySelector(".carousel-slide");
-const sliderImages = document.querySelectorAll(".carousel-slide img");
+let sliderContainer;
+let parentElement;
+let sliderImages;
+let numImg;
+let counter;
 
-let sliderImagesArr = Array.from(sliderImages);
-console.log(sliderImagesArr);
+// parentElement.id = "destination";
+// sliderContainer.insertAdjacentElement("beforebegin", parentElement);
+// parentElement.appendChild(sliderContainer);
 
-let numImg = sliderImages.length;
-console.log(numImg);
+// console.log(parentElement);
+// parentElement.className = "carousel-container";
+const stringToBoolean = dataValue => dataValue === "true";
 
-let counter = 0;
+function MySlider() {
+  sliderContainer = document.querySelector(".carousel-slide");
+  parentElement = document.createElement("div");
+  sliderImages = document.querySelectorAll(".carousel-slide img");
+  numImg = sliderImages.length;
+  counter = 0;
+  
+
+  parentElement.id = "destination";
+  sliderContainer.insertAdjacentElement("beforebegin", parentElement);
+  parentElement.appendChild(sliderContainer);
+
+  console.log(parentElement);
+
+  parentElement.className = "carousel-container";
+  if (stringToBoolean(sliderContainer.dataset.arrows)) {
+    toggleArrows();
+  }
+  if (sliderContainer.dataset.autoplay) {
+    autoPlay(sliderContainer.dataset.autoplay);
+  }
+}
+
+MySlider();
+
+
+
+
 const imgSize = -sliderImages[0].clientWidth;
 
 function toggleArrows() {
-  if (parentElement.dataset.arrows === "true") {
-    function leftArrow() {
-      let leftArrow = document.createElement("i");
-      parentElement.appendChild(leftArrow);
-      console.log(leftArrow);
-      leftArrow.className = "fas fa-chevron-left";
-      leftArrow.id = "arrow-left";
+  let leftArrow = document.createElement("i");
+  parentElement.appendChild(leftArrow);
+  leftArrow.className = "fas fa-chevron-left";
+  leftArrow.id = "arrow-left";
 
-      const prevButton = document.getElementById("arrow-left");
-      prevButton.addEventListener("click", () => {
-        slidingOn(-1)
-        infinityToLast();
-      });
-    }
+  const prevButton = document.getElementById("arrow-left");
+  prevButton.addEventListener("click", () => {
+    slidingOn("left");
+  });
 
-    leftArrow();
+  let rightArrow = document.createElement("i");
+  parentElement.appendChild(rightArrow);
+  rightArrow.className = "fas fa-chevron-right";
+  rightArrow.id = "arrow-right";
 
-    function rightArrow() {
-      console.log(parentElement);
-
-      let rightArrow = document.createElement("i");
-      parentElement.appendChild(rightArrow);
-      console.log(rightArrow);
-      rightArrow.className = "fas fa-chevron-right";
-      rightArrow.id = "arrow-right";
-
-      const nextButton = document.getElementById("arrow-right");
-      nextButton.addEventListener("click", () => {
-        console.log(" length " + sliderImages[counter]);
-
-        slidingOn(1)
-        infinityToFirst();
-      });
-    }
-
-    rightArrow();
-  }
+  const nextButton = document.getElementById("arrow-right");
+  nextButton.addEventListener("click", () => {
+    slidingOn("right");
+  });
 }
 
-toggleArrows();
+// function slide(i) {
+//   setTimeout(function() {
+//     slidingOn("right");
+//     infinityToFirst();
 
-//size of the im
-// sliderContainer.style.transform = 'translateX(' + (-imgSize) + 'px'
+//     console.log("sliding..");
+//   }, 2000 * i);
+// }
 
-function autoPlay() {
-  if (parentElement.dataset.autoplay === "true") {
-    for (var i = 0; i < sliderImages.length; i++) {
-      slide(i);
-      console.log("sliding1");
-    }
-
-    function slide(i) {
-      setTimeout(function() {
-        slidingOn(1)
-        infinityToFirst();
-        console.log("sliding..");
-      }, 2000 * i);
-    }
-  }
+function autoPlay(delay) {
+  setInterval(() => {
+    slidingOn("right");
+  }, delay);
 }
-
-autoPlay();
-
-// function slideRight() {
-//   sliderContainer.style.transition = "transform 0.4s ease-in-out";
-//   dir++;
-//   sliderContainer.style.transform = "translateX(" + imgSize * dir + "px";
-//   console.log(sliderContainer.style.transform);
-//   console.log(dir);
-// }
-
-// function slideLeft() {
-//   sliderContainer.style.transition = "transform 0.4s ease-in-out";
-//   counter--;
-//   sliderContainer.style.transform = "translateX(" + imgSize * counter + "px";
-//   const transformStyle = sliderContainer.style.transform;
-//   const translateX = +transformStyle.replace(/[^\d.]/g, "");
-//   console.log(translateX);
-//   console.log(counter);
-// }
 
 function slidingOn(count) {
   sliderContainer.style.transition = "transform 0.4s ease-in-out";
-  if ((count == 1)) {
+  if (count == "right") {
     counter++;
     sliderContainer.style.transform = "translateX(" + imgSize * counter + "px";
-    
-  } else if (count == -1) {
+    console.log(counter);
+    if (counter === numImg) {
+      counter = sliderImages.length - numImg;
+      sliderContainer.style.transform =
+        "translateX(" + -imgSize * counter + "px";
+    }
+  } else if (count == "left") {
     counter--;
     sliderContainer.style.transform = "translateX(" + imgSize * counter + "px";
-
+    if (counter === -1) {
+      counter = sliderImages.length - 1;
+      sliderContainer.style.transform =
+        "translateX(" + imgSize * counter + "px";
+    }
   }
 }
-
-// function infinityToFirst() {
-//   if (typeof sliderImages[counter] === "undefined") {
-//     console.log(" length " + sliderImages.length);
-
-//     counter = sliderImages.length - numImg;
-//     sliderContainer.style.transform = "translateX(" + -imgSize * counter + "px";
-//   }
-// }
-
-function infinityToFirst() {
-  if (counter === numImg) {
-    console.log("prev");
-
-    counter = sliderImages.length - numImg;
-    sliderContainer.style.transform = "translateX(" + -imgSize * counter + "px";
-  }
-}
-
-function infinityToLast() {
-  if (counter === -1) {
-    console.log("prev");
-
-    counter = sliderImages.length - 1;
-    sliderContainer.style.transform = "translateX(" + -imgSize * counter + "px";
-  }
-}
-
-// let theFirstChild = parentElement.firstChild;
