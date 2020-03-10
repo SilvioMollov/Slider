@@ -4,21 +4,21 @@
     box-sizing: border-box;
 }
 
-.carousel-container {
+.s-slider {
     width: 150vh;
     margin: auto;
     border: 5px solid black;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 
 
-.carousel-slide {
+.carousel-track {
     display: flex;
 
 }
 
-.carousel-slide img {
+.carousel-track img {
 
     width: 100%;
     height: 580px;

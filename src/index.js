@@ -1,54 +1,54 @@
 import "./style.css";
 import "./../node_modules/@fortawesome/fontawesome-free/css/all.css";
-// import printMe from "./print.js";
-// let theFirstChild = parentElement.firstChild;
-let sliderContainer;
-let parentElement;
-let sliderImages;
-let numImg;
+
+let container;
+let slides;
+let slidesCount;
 let counter;
+let slideSize;
+let track;
 
-// parentElement.id = "destination";
-// sliderContainer.insertAdjacentElement("beforebegin", parentElement);
-// parentElement.appendChild(sliderContainer);
-
-// console.log(parentElement);
-// parentElement.className = "carousel-container";
 const stringToBoolean = dataValue => dataValue === "true";
 
+function wrap() {
+  container = document.querySelector(".s-slider");
+  track = document.createElement("div");
+
+  container.childNodes.forEach(slide => {
+    if (slide.nodeType === 1) {
+      slide.classList.add("slide");
+      track.appendChild(slide);
+    }
+  });
+
+  track.classList = "carousel-track";
+  container.innerHTML = "";
+  container.appendChild(track);
+}
+
+wrap();
+
 function MySlider() {
-  sliderContainer = document.querySelector(".carousel-slide");
-  parentElement = document.createElement("div");
-  sliderImages = document.querySelectorAll(".carousel-slide img");
-  numImg = sliderImages.length;
+ 
+  slides = track.childNodes;
+  slideSize = -slides[0].clientWidth;
+  slidesCount = slides.length;
   counter = 0;
-  
 
-  parentElement.id = "destination";
-  sliderContainer.insertAdjacentElement("beforebegin", parentElement);
-  parentElement.appendChild(sliderContainer);
-
-  console.log(parentElement);
-
-  parentElement.className = "carousel-container";
-  if (stringToBoolean(sliderContainer.dataset.arrows)) {
+  if (stringToBoolean(container.dataset.arrows)) {
     toggleArrows();
   }
-  if (sliderContainer.dataset.autoplay) {
-    autoPlay(sliderContainer.dataset.autoplay);
+  if (container.dataset.autoplay) {
+    autoPlay(container.dataset.autoplay);
   }
 }
 
 MySlider();
 
-
-
-
-const imgSize = -sliderImages[0].clientWidth;
-
+// creating a function that creates the arrow accepting an argument, based on which arrow we are setting
 function toggleArrows() {
   let leftArrow = document.createElement("i");
-  parentElement.appendChild(leftArrow);
+  container.appendChild(leftArrow);
   leftArrow.className = "fas fa-chevron-left";
   leftArrow.id = "arrow-left";
 
@@ -58,7 +58,7 @@ function toggleArrows() {
   });
 
   let rightArrow = document.createElement("i");
-  parentElement.appendChild(rightArrow);
+  container.appendChild(rightArrow);
   rightArrow.className = "fas fa-chevron-right";
   rightArrow.id = "arrow-right";
 
@@ -68,39 +68,30 @@ function toggleArrows() {
   });
 }
 
-// function slide(i) {
-//   setTimeout(function() {
-//     slidingOn("right");
-//     infinityToFirst();
-
-//     console.log("sliding..");
-//   }, 2000 * i);
-// }
-
 function autoPlay(delay) {
   setInterval(() => {
     slidingOn("right");
   }, delay);
 }
 
-function slidingOn(count) {
-  sliderContainer.style.transition = "transform 0.4s ease-in-out";
-  if (count == "right") {
+function slidingOn(direction) {
+  track.style.transition = "transform 0.4s ease-in-out";
+  if (direction == "right") {
     counter++;
-    sliderContainer.style.transform = "translateX(" + imgSize * counter + "px";
-    console.log(counter);
-    if (counter === numImg) {
-      counter = sliderImages.length - numImg;
-      sliderContainer.style.transform =
-        "translateX(" + -imgSize * counter + "px";
+    track.style.transform = "translateX(" + slideSize * counter + "px";
+    
+
+    if (counter === slidesCount) {
+      counter = slides.length - slidesCount;
+      track.style.transform = "translateX(" + -slideSize * counter + "px";
     }
-  } else if (count == "left") {
+  } else if (direction == "left") {
     counter--;
-    sliderContainer.style.transform = "translateX(" + imgSize * counter + "px";
+    track.style.transform = "translateX(" + slideSize * counter + "px";
+
     if (counter === -1) {
-      counter = sliderImages.length - 1;
-      sliderContainer.style.transform =
-        "translateX(" + imgSize * counter + "px";
+      counter = slides.length - 1;
+      track.style.transform = "translateX(" + slideSize * counter + "px";
     }
   }
 }
