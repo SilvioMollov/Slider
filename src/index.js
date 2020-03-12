@@ -26,10 +26,9 @@ function wrap() {
   container.appendChild(track);
 }
 
-wrap();
 
 function MySlider() {
- 
+  wrap();
   slides = track.childNodes;
   slideSize = -slides[0].clientWidth;
   slidesCount = slides.length;
@@ -43,7 +42,7 @@ function MySlider() {
   }
 }
 
-MySlider();
+window.onload = MySlider();
 
 // creating a function that creates the arrow accepting an argument, based on which arrow we are setting
 function toggleArrows() {
