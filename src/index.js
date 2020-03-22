@@ -7,15 +7,13 @@ let container = document.querySelector('.s-slider'),
 let slides;
 let slidesCount;
 let counter;
-let slideSize;
+let slideSize, posInitial;
 
 const stringToBoolean = dataValue => dataValue === 'true';
 
 window.onload = MySlider(track, container);
 
 function MySlider(wrapper, container) {
-
-
   container.childNodes.forEach(slide => {
     if (slide.nodeType === 1) {
       slide.classList.add('slide');
@@ -26,11 +24,35 @@ function MySlider(wrapper, container) {
   wrapper.classList = 'carousel-track';
   container.innerHTML = '';
   container.appendChild(wrapper);
-
   slides = wrapper.childNodes;
-  slideSize = -slides[0].clientWidth;
+  slideSize = slides[0].clientWidth;
+  //placing it here before intilization of how much slides there are
+
+  // cloneFirstandLast()
+
   slidesCount = slides.length;
+  let allowShift = true;
   counter = 0;
+  let posInitial, posFinal;
+
+  // cloning first and last element
+  function cloneFirstandLast() {
+    let firstImg = wrapper.firstElementChild.cloneNode();
+    let lastImg = wrapper.lastElementChild.cloneNode();
+    wrapper.appendChild(firstImg);
+    wrapper.insertAdjacentElement('afterbegin', lastImg);
+    firstImg.classList = 'slide firstSlide';
+    lastImg.classList = 'slide lastSlide';
+  }
+
+  // wrapper.onmousedown = startDrag
+
+  // wrapper.addEventListener('touchstart', (e) => {
+  //   e = e || window.event
+  //   e.preventDefault();
+  //    posInitial = wrapper.offsetLeft
+
+  // })
 
   if (stringToBoolean(container.dataset.arrows)) {
     toggleArrows();
@@ -57,6 +79,7 @@ function MySlider(wrapper, container) {
 
     const nextButton = document.getElementById('arrow-right');
     nextButton.addEventListener('click', () => {
+      console.log('click');
       slidingOn('right');
     });
   }
@@ -66,26 +89,42 @@ function MySlider(wrapper, container) {
     }, delay);
   }
 
-  function slidingOn(direction) {
-    wrapper.style.transition = 'transform 0.4s ease-in-out';
-    if (direction == 'right') {
-      counter++;
-      wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+  wrapper.addEventListener('transitionend', () => {
+    indexCheck();
+    
+  });
+  
+  function indexCheck() {
+    if (counter === slidesCount) {
+      wrapper.classList.remove('shifting');
+      counter = 0;
+      wrapper.style.left = -(1 * counter) + 'px';
 
-      if (counter === slidesCount) {
-        counter = slides.length - slidesCount;
-        wrapper.style.transform = 'translateX(' + -slideSize * counter + 'px';
+    } else if (counter === -1) {
+      wrapper.classList.remove('shifting');
+      counter = slides.length - 1 ;
+      wrapper.style.left = -(slidesCount * slideSize - slideSize) + "px";
+      console.log('loger',slidesCount, slideSize)
+    }
+  }
+
+  function slidingOn(direction, action) {
+    wrapper.classList.add('shifting');
+
+    if (allowShift) {
+      if (!action) {
+        posInitial = wrapper.offsetLeft;
       }
-    } else if (direction == 'left') {
-      counter--;
-      wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
-
-      if (counter === -1) {
-        counter = slides.length - 1;
-        wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+      if (direction == 'right') {
+        counter++;
+        wrapper.style.left = posInitial - slideSize + 'px';
+        console.log(posInitial, slideSize)
+      } else if (direction == 'left') {
+        counter--;
+        wrapper.style.left = posInitial + slideSize + 'px';
+        console.log("left",counter);
+        console.log(slidesCount);
       }
     }
   }
 }
-
-// creating a function that creates the arrow accepting an argument, based on which arrow we are setting
