@@ -81,7 +81,7 @@ function MySlider(wrapper, container) {
     }, delay);
   }
 
-  wrapper.addEventListener('transitionstart', indexCheck);
+  // wrapper.addEventListener('transitionstart', indexCheck);
   
   wrapper.addEventListener('touchstart', startDrag);
   wrapper.addEventListener('touchmove', moveDrag);
@@ -89,11 +89,16 @@ function MySlider(wrapper, container) {
 
   function indexCheck() {
     if (counter === slidesCount) {
-      counter = slides.length - slidesCount;
-      wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+      // counter = slides.length - slidesCount;
+      // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+      counter = 0;
+      wrapper.style.left = -(1 * counter) + 'px';
     } else if (counter === -1) {
-      counter = slides.length - 1;
-      wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+      // counter = slides.length - 1;
+      // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+
+      counter = slides.length - 1 ;
+      wrapper.style.left = (slidesCount * slideSize - slideSize) + "px";
       console.log('loger', slidesCount, slideSize);
     }
   }
@@ -122,10 +127,12 @@ function MySlider(wrapper, container) {
     posX2 = posX1 - e.clientX;
     posX1 = e.clientX;
     // console.log('position move', posX2, posX1);
+  
+    // wrapper.style.transform = 'translateX(' + posX1 + 'px';
 
     wrapper.style.left = (wrapper.offsetLeft - posX2) + 'px';
-    console.log('position move',posX1, e.clientX, posX2);
-    // console.log(wrapper.offsetLeft);
+    // console.log('position move',posX1, e.clientX, posX2);
+    console.log(wrapper.offsetLeft, posX2, posX1);
   }
 
   
@@ -135,8 +142,10 @@ function MySlider(wrapper, container) {
 
     if (posX2 >= 1) {
       slidingOn('right', 'drag');
+      console.log('right', posFinal, posInitial, posX1);
     } else if (posX2 < 1) {
       slidingOn('left', 'drag');
+      console.log('left', posFinal,posInitial, posX1);
     } else {
       wrapper.style.left = posInitial + 'px';
       console.log('end', posFinal, posInitial);
@@ -148,19 +157,25 @@ function MySlider(wrapper, container) {
 
   function slidingOn(direction, action) {
     wrapper.classList.add('shifting');
+    // wrapper.style.transition = 'left 0.4s ease-in-out'
 
     if (!action) {
       posInitial = wrapper.offsetLeft;
     }
     if (direction == 'right') {
       counter++;
-      wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+      wrapper.style.left = posInitial - -slideSize + 'px';
+      // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
       // console.log(posInitial, slideSize);
     } else if (direction == 'left') {
       counter--;
-      wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+      // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+      wrapper.style.left = posInitial - slideSize + 'px';
+      
+
       console.log('left', counter);
       console.log(slidesCount);
     }
+    indexCheck()
   }
 }
