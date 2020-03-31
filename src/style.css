@@ -10,12 +10,13 @@
   left: 25%;
   width: 50%;
   border: 5px solid black;
-  /* overflow: hidden; */
+  overflow: hidden;
 }
 
 .carousel-track {
   display: flex;
   position: relative;
+  /* left: 100%; */
   top: 0;
   /* transition: transform 0.4s ease-in-out; */
 }
@@ -39,7 +40,7 @@
 }
 
 .shifting {
-  /* transition: left 0.4s ease-in-out; */
+  transition: left 0.4s ease-in-out;
 }
 
 #arrow-left,
