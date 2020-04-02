@@ -33,7 +33,7 @@ function MySlider(wrapper, container) {
   counter = 0;
   posInitial, posFinal;
 
-  // cloneFirstandLast();
+  cloneFirstandLast();
   // cloning first and last element
   function cloneFirstandLast() {
     let firstImg = wrapper.firstElementChild.cloneNode();
@@ -70,7 +70,7 @@ function MySlider(wrapper, container) {
 
     const nextButton = document.getElementById('arrow-right');
     nextButton.addEventListener('click', () => {
-      console.log('click');
+     
       slidingOn('right');
     });
   }
@@ -98,7 +98,7 @@ function MySlider(wrapper, container) {
       posX1 = e.clientX;
       document.onmouseup = endDrag;
       document.onmousemove = moveDrag;
-      console.log('touchstart', posX1, posInitial);
+      
     }
 
     function moveDrag(e) {
@@ -113,7 +113,7 @@ function MySlider(wrapper, container) {
 
       wrapper.style.left = wrapper.offsetLeft - posX2 + 'px';
       // console.log('position move',posX1, e.clientX, posX2);
-      console.log('position move', wrapper.offsetLeft, posX2, posX1);
+      
     }
 
     function endDrag(e) {
@@ -121,14 +121,14 @@ function MySlider(wrapper, container) {
 
       if (posX2 >= 1) {
         slidingOn('right', 'drag');
-        console.log('right', posFinal, posInitial, posX1);
+        
       } else if (posX2 < 1) {
         slidingOn('left', 'drag');
-        console.log('left', posFinal, posInitial, posX1);
+        
       } else {
         wrapper.style.left = posInitial + 'px';
       }
-      console.log('end', posFinal, posInitial);
+      
       document.onmouseup = null;
       document.onmousemove = null;
     }
@@ -136,43 +136,43 @@ function MySlider(wrapper, container) {
 
   function slidingOn(direction, action) {
     wrapper.classList.add('shifting');
-    // wrapper.style.transition = 'left 0.4s ease-in-out'
-    // wrapper.style.transition = 'left 0.4s ease-in-out';
     
+      
       if (!action) {
         posInitial = wrapper.offsetLeft;
       }
+      console.log(posInitial, )
       if (direction == 'right') {
         wrapper.style.left = posInitial - -slideSize + 'px';
         counter++;
+        
         // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
         // console.log(posInitial, slideSize);
       } else if (direction == 'left') {
         // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
         wrapper.style.left = posInitial - slideSize + 'px';
         counter--;
-        console.log('left', counter);
-        console.log(slidesCount);
+        
       }
-    
+    console.log(counter, slides.length)
 
     
   }
 
   function indexCheck() {
     wrapper.classList.remove('shifting');
-    if (counter === slidesCount) {
+    if (counter >=slidesCount) {
       // counter = slides.length - slidesCount;
       // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
       counter = 0;
-      wrapper.style.left = -(1 * counter) + 'px';
-    } else if (counter === -1) {
+      wrapper.style.left = (slideSize) + 'px';
+    } else if (counter <= 0) {
       // counter = slides.length - 1;
       // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
 
-      counter = slides.length - 1;
-      wrapper.style.left = slidesCount * slideSize - slideSize + 'px';
-      console.log('loger', slidesCount, slideSize);
+      
+      wrapper.style.left = slidesCount * slideSize  + 'px';
+      counter = slides.length - 2;
     }
     
   }
