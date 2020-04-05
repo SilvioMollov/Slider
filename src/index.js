@@ -164,8 +164,9 @@ function MySlider(wrapper, container) {
     if (counter >=slidesCount) {
       // counter = slides.length - slidesCount;
       // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
-      counter = 0;
+      
       wrapper.style.left = (slideSize) + 'px';
+      counter = 0;
     } else if (counter <= 0) {
       // counter = slides.length - 1;
       // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
