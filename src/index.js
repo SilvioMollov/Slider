@@ -133,6 +133,15 @@ function MySlider(wrapper, container) {
       document.onmousemove = null;
     }
   }
+  
+  arrowKeySlide()
+
+  function arrowKeySlide() {
+    document.addEventListener('keydown', (e) => {
+      let keyDown = e.key
+      console.log(keyDown)
+    })
+  }
 
   function slidingOn(direction, action) {
     wrapper.classList.add('shifting');
