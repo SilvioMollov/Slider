@@ -9,12 +9,12 @@ let slidesCount;
 let counter;
 let slideSize, posInitial, posFinal, posX1, posX2;
 
-const stringToBoolean = dataValue => dataValue === 'true';
+const stringToBoolean = (dataValue) => dataValue === 'true';
 
 window.onload = MySlider(track, container);
 
 function MySlider(wrapper, container) {
-  container.childNodes.forEach(slide => {
+  container.childNodes.forEach((slide) => {
     if (slide.nodeType === 1) {
       slide.classList.add('slide');
       wrapper.appendChild(slide);
@@ -26,7 +26,7 @@ function MySlider(wrapper, container) {
   container.appendChild(wrapper);
   slides = wrapper.childNodes;
   slideSize = -slides[0].clientWidth;
-  
+
   //placing it here before intilization of how much slides there are
   slidesCount = slides.length;
 
@@ -51,6 +51,9 @@ function MySlider(wrapper, container) {
   if (stringToBoolean(container.dataset.drag)) {
     dragSlide();
   }
+  if(stringToBoolean(container.dataset.keychange)) {
+    arrowKeySlide();
+  }
 
   function toggleArrows() {
     let leftArrow = document.createElement('i');
@@ -70,7 +73,6 @@ function MySlider(wrapper, container) {
 
     const nextButton = document.getElementById('arrow-right');
     nextButton.addEventListener('click', () => {
-     
       slidingOn('right');
     });
   }
@@ -98,7 +100,6 @@ function MySlider(wrapper, container) {
       posX1 = e.clientX;
       document.onmouseup = endDrag;
       document.onmousemove = moveDrag;
-      
     }
 
     function moveDrag(e) {
@@ -113,7 +114,6 @@ function MySlider(wrapper, container) {
 
       wrapper.style.left = wrapper.offsetLeft - posX2 + 'px';
       // console.log('position move',posX1, e.clientX, posX2);
-      
     }
 
     function endDrag(e) {
@@ -121,69 +121,69 @@ function MySlider(wrapper, container) {
 
       if (posX2 >= 1) {
         slidingOn('right', 'drag');
-        
       } else if (posX2 < 1) {
         slidingOn('left', 'drag');
-        
       } else {
         wrapper.style.left = posInitial + 'px';
       }
-      
+
       document.onmouseup = null;
       document.onmousemove = null;
     }
   }
+
   
-  arrowKeySlide()
 
   function arrowKeySlide() {
-    document.addEventListener('keydown', (e) => {
-      let keyDown = e.key
-      console.log(keyDown)
-    })
+    document.addEventListener(
+      'keyup',
+      (e) => {
+        let keyUp = e.key;
+        if (keyUp == 'ArrowLeft') {
+          slidingOn('left');
+        } else if (keyUp == 'ArrowRight') {
+          slidingOn('right');
+        }
+      },
+      false
+    );
   }
 
   function slidingOn(direction, action) {
     wrapper.classList.add('shifting');
-    
-      
-      if (!action) {
-        posInitial = wrapper.offsetLeft;
-      }
-      console.log(posInitial, )
-      if (direction == 'right') {
-        wrapper.style.left = posInitial - -slideSize + 'px';
-        counter++;
-        
-        // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
-        // console.log(posInitial, slideSize);
-      } else if (direction == 'left') {
-        // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
-        wrapper.style.left = posInitial - slideSize + 'px';
-        counter--;
-        
-      }
-    console.log(counter, slides.length)
 
-    
+    if (!action) {
+      posInitial = wrapper.offsetLeft;
+    }
+    console.log(posInitial);
+    if (direction == 'right') {
+      wrapper.style.left = posInitial - -slideSize + 'px';
+      counter++;
+
+      // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+      // console.log(posInitial, slideSize);
+    } else if (direction == 'left') {
+      // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+      wrapper.style.left = posInitial - slideSize + 'px';
+      counter--;
+    }
+    console.log(counter, slidesCount);
   }
 
   function indexCheck() {
     wrapper.classList.remove('shifting');
-    if (counter >=slidesCount) {
+    if (counter >= slidesCount) {
       // counter = slides.length - slidesCount;
       // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
-      
-      wrapper.style.left = (slideSize) + 'px';
+
+      wrapper.style.left = slideSize + 'px';
       counter = 0;
-    } else if (counter <= 0) {
+    } else if (counter < 0) {
       // counter = slides.length - 1;
       // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
 
-      
-      wrapper.style.left = slidesCount * slideSize  + 'px';
-      counter = slides.length - 2;
+      wrapper.style.left = slidesCount * slideSize + 'px';
+      counter = slidesCount - 1;
     }
-    
   }
 }
