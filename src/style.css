@@ -39,9 +39,9 @@
   background: #ffcf47;
 }
 
-.shifting {
+/* .shifting {
   transition: left 0.4s ease-in-out;
-}
+} */
 
 #arrow-left,
 #arrow-right {

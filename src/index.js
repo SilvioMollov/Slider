@@ -7,7 +7,11 @@ let container = document.querySelector('.s-slider'),
 let slides;
 let slidesCount;
 let counter;
-let slideSize, posInitial, posFinal, posX1, posX2;
+let slideSize, posInitial, posFinal, posX1, posX2, style;
+
+let allowSlide = true;
+let allowSlideRight = true;
+let allowSlideLeft = true;
 
 const stringToBoolean = (dataValue) => dataValue === 'true';
 
@@ -26,6 +30,7 @@ function MySlider(wrapper, container) {
   container.appendChild(wrapper);
   slides = wrapper.childNodes;
   slideSize = -slides[0].clientWidth;
+  let infinite = stringToBoolean(container.dataset.infinite);
 
   //placing it here before intilization of how much slides there are
   slidesCount = slides.length;
@@ -34,6 +39,7 @@ function MySlider(wrapper, container) {
   posInitial, posFinal;
 
   cloneFirstandLast();
+  creatingStyle();
   // cloning first and last element
   function cloneFirstandLast() {
     let firstImg = wrapper.firstElementChild.cloneNode();
@@ -51,15 +57,20 @@ function MySlider(wrapper, container) {
   if (stringToBoolean(container.dataset.drag)) {
     dragSlide();
   }
-  if(stringToBoolean(container.dataset.keychange)) {
+  if (stringToBoolean(container.dataset.keychange)) {
     arrowKeySlide();
+  }
+  if (container.dataset.transition) {
+    let timer = container.dataset.transition / 10000
+
+    changeTime(timer)
   }
 
   function toggleArrows() {
     let leftArrow = document.createElement('i');
-    container.appendChild(leftArrow);
     leftArrow.className = 'fas fa-chevron-left';
     leftArrow.id = 'arrow-left';
+    container.appendChild(leftArrow);
 
     const prevButton = document.getElementById('arrow-left');
     prevButton.addEventListener('click', () => {
@@ -67,9 +78,9 @@ function MySlider(wrapper, container) {
     });
 
     let rightArrow = document.createElement('i');
-    container.appendChild(rightArrow);
     rightArrow.className = 'fas fa-chevron-right';
     rightArrow.id = 'arrow-right';
+    container.appendChild(rightArrow);
 
     const nextButton = document.getElementById('arrow-right');
     nextButton.addEventListener('click', () => {
@@ -82,8 +93,6 @@ function MySlider(wrapper, container) {
       slidingOn('right');
     }, delay);
   }
-
-  wrapper.addEventListener('transitionend', indexCheck);
 
   function dragSlide() {
     wrapper.onmousedown = startDrag;
@@ -108,12 +117,7 @@ function MySlider(wrapper, container) {
       posX2 = posX1 - e.clientX;
       posX1 = e.clientX;
 
-      // console.log('position move', posX2, posX1);
-
-      // wrapper.style.transform = 'translateX(' + posX1 + 'px';
-
       wrapper.style.left = wrapper.offsetLeft - posX2 + 'px';
-      // console.log('position move',posX1, e.clientX, posX2);
     }
 
     function endDrag(e) {
@@ -132,58 +136,80 @@ function MySlider(wrapper, container) {
     }
   }
 
-  
-
   function arrowKeySlide() {
     document.addEventListener(
       'keyup',
       (e) => {
         let keyUp = e.key;
-        if (keyUp == 'ArrowLeft') {
+        if (keyUp === 'ArrowLeft') {
           slidingOn('left');
-        } else if (keyUp == 'ArrowRight') {
+        } else if (keyUp === 'ArrowRight') {
           slidingOn('right');
         }
       },
       false
     );
   }
+  // creating the stylesheet for the class shifting
+  
+  
+  function creatingStyle() {
+    style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = `.shifting {transition: left 0.4s ease-in-out; }`;
+    document.getElementsByTagName('head')[0].appendChild(style);
+  }
+
+  function changeTime(time) {
+    style.innerHTML = `.shifting {transition: left ${time}s ease-in-out; }`;
+  }
 
   function slidingOn(direction, action) {
+    
     wrapper.classList.add('shifting');
 
-    if (!action) {
-      posInitial = wrapper.offsetLeft;
+    if (allowSlide) {
+      if (!action) {
+        posInitial = wrapper.offsetLeft;
+      }
+      console.log(posInitial);
+      if (direction === 'right' && allowSlideRight === true) {
+        wrapper.style.left = posInitial - -slideSize + 'px';
+        counter++;
+      } else if (direction === 'left' && allowSlideLeft === true) {
+        wrapper.style.left = posInitial - slideSize + 'px';
+        counter--;
+      }
     }
-    console.log(posInitial);
-    if (direction == 'right') {
-      wrapper.style.left = posInitial - -slideSize + 'px';
-      counter++;
-
-      // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
-      // console.log(posInitial, slideSize);
-    } else if (direction == 'left') {
-      // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
-      wrapper.style.left = posInitial - slideSize + 'px';
-      counter--;
-    }
+    allowSlideRight = true;
+    allowSlideLeft = true;
+    // allowSlide = false
     console.log(counter, slidesCount);
   }
 
+  wrapper.addEventListener('transitionend', indexCheck);
+
   function indexCheck() {
     wrapper.classList.remove('shifting');
-    if (counter >= slidesCount) {
-      // counter = slides.length - slidesCount;
-      // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
+    if (infinite === true) {
+      if (counter >= slidesCount) {
+        wrapper.style.left = slideSize + 'px';
+        counter = 0;
+      } else if (counter < 0) {
+        wrapper.style.left = slidesCount * slideSize + 'px';
+        counter = slidesCount - 1;
+      }
+    } else {
+      // Needs workkkkkkkkkkkk
 
-      wrapper.style.left = slideSize + 'px';
-      counter = 0;
-    } else if (counter < 0) {
-      // counter = slides.length - 1;
-      // wrapper.style.transform = 'translateX(' + slideSize * counter + 'px';
-
-      wrapper.style.left = slidesCount * slideSize + 'px';
-      counter = slidesCount - 1;
+      if (counter >= slidesCount - 1) {
+        wrapper.style.left = slidesCount * slideSize + 'px';
+        changeTime()
+        allowSlideRight = false;
+      } else if (counter <= 0) {
+        allowSlideLeft = false;
+      }
     }
+    allowSlide = true;
   }
 }
