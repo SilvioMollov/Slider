@@ -39,7 +39,7 @@ function MySlider(wrapper, container) {
   posInitial, posFinal;
 
   cloneFirstandLast();
-  creatingStyle();
+  // creatingStyle();
   // cloning first and last element
   function cloneFirstandLast() {
     let firstImg = wrapper.firstElementChild.cloneNode();
@@ -70,11 +70,11 @@ function MySlider(wrapper, container) {
   if (stringToBoolean(container.dataset.keychange)) {
     arrowKeySlide();
   }
-  if (container.dataset.transition) {
-    let timer = container.dataset.transition / 10000
+  // if (container.dataset.transition) {
+  //   let timer = container.dataset.transition / 10000
 
-    changeTime(timer)
-  }
+  //   changeTime(timer)
+  // }
 
   
 
@@ -174,24 +174,15 @@ function MySlider(wrapper, container) {
   // creating the stylesheet for the class shifting
   
   
-  function creatingStyle() {
-    transitionStyle = document.createElement('style');
-    transitionStyle.type = 'text/css';
-    // transitionStyle.innerHTML = `.shifting {transition: left 0.4s ease-in-out; }`;
-    transitionStyle.style.transition = 'left 0.4s ease-in-out;'
-    document.getElementsByTagName('head')[0].appendChild(transitionStyle);
-  }
+ 
 
   function changeTime(time) {
-    transitionStyle.style.transition = ''
-    transitionStyle.style.transition = `left ${time}s ease-in-out;`
-
-    // transitionStyle.innerHTML = `.shifting {transition: left ${time}s ease-in-out; }`;
-    }
+    wrapper.style.transition = `left ${time}s ease-in-out`
+  }
 
   function slidingOn(direction, action) {
-    
-    wrapper.classList.add('shifting');
+    changeTime(container.dataset.transition / 10000)
+   
 
     if (allowSlide) {
       if (!action) {
@@ -217,7 +208,7 @@ function MySlider(wrapper, container) {
   wrapper.addEventListener('transitionend', indexCheck);
 
   function indexCheck() {
-    wrapper.classList.remove('shifting');
+    wrapper.style.transition = ''
     if (infinite === true) {
       if (counter >= slidesCount) {
         wrapper.style.left = slideSize + 'px';
