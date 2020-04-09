@@ -7,7 +7,7 @@ let container = document.querySelector('.s-slider'),
 let slides;
 let slidesCount;
 let counter;
-let slideSize, posInitial, posFinal, posX1, posX2, style;
+let slideSize, posInitial, posFinal, posX1, posX2, transitionStyle;
 
 let allowSlide = true;
 let allowSlideRight = true;
@@ -48,6 +48,16 @@ function MySlider(wrapper, container) {
     wrapper.insertAdjacentElement('afterbegin', lastImg);
   }
 
+  const throttle = (func, limit) => {
+  let inThrottle
+  return (...args) => {
+    if (!inThrottle) {
+      func(...args)
+      inThrottle = setTimeout(() => inThrottle = false, limit)
+    }
+  }
+}
+
   if (stringToBoolean(container.dataset.arrows)) {
     toggleArrows();
   }
@@ -65,6 +75,9 @@ function MySlider(wrapper, container) {
 
     changeTime(timer)
   }
+
+  
+
 
   function toggleArrows() {
     let leftArrow = document.createElement('i');
@@ -84,8 +97,16 @@ function MySlider(wrapper, container) {
 
     const nextButton = document.getElementById('arrow-right');
     nextButton.addEventListener('click', () => {
-      slidingOn('right');
+      (slidingOn('right'))
     });
+
+    // nextButton.addEventListener('click', throttle(function() {
+    //   return console.log('Hey! It is', new Date().toUTCString());
+    // }, 5000));
+
+      // function newDAte() {
+      //   return console.log('Hey! It is', new Date().toUTCString())
+      // }
   }
 
   function autoPlay(delay) {
@@ -142,7 +163,7 @@ function MySlider(wrapper, container) {
       (e) => {
         let keyUp = e.key;
         if (keyUp === 'ArrowLeft') {
-          slidingOn('left');
+          throttle(slidingOn('left'), 2000);
         } else if (keyUp === 'ArrowRight') {
           slidingOn('right');
         }
@@ -154,15 +175,19 @@ function MySlider(wrapper, container) {
   
   
   function creatingStyle() {
-    style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerHTML = `.shifting {transition: left 0.4s ease-in-out; }`;
-    document.getElementsByTagName('head')[0].appendChild(style);
+    transitionStyle = document.createElement('style');
+    transitionStyle.type = 'text/css';
+    // transitionStyle.innerHTML = `.shifting {transition: left 0.4s ease-in-out; }`;
+    transitionStyle.style.transition = 'left 0.4s ease-in-out;'
+    document.getElementsByTagName('head')[0].appendChild(transitionStyle);
   }
 
   function changeTime(time) {
-    style.innerHTML = `.shifting {transition: left ${time}s ease-in-out; }`;
-  }
+    transitionStyle.style.transition = ''
+    transitionStyle.style.transition = `left ${time}s ease-in-out;`
+
+    // transitionStyle.innerHTML = `.shifting {transition: left ${time}s ease-in-out; }`;
+    }
 
   function slidingOn(direction, action) {
     
@@ -183,10 +208,12 @@ function MySlider(wrapper, container) {
     }
     allowSlideRight = true;
     allowSlideLeft = true;
-    // allowSlide = false
+    allowSlide = false
     console.log(counter, slidesCount);
   }
 
+
+  
   wrapper.addEventListener('transitionend', indexCheck);
 
   function indexCheck() {
@@ -204,7 +231,7 @@ function MySlider(wrapper, container) {
 
       if (counter >= slidesCount - 1) {
         wrapper.style.left = slidesCount * slideSize + 'px';
-        changeTime()
+        
         allowSlideRight = false;
       } else if (counter <= 0) {
         allowSlideLeft = false;
