@@ -1,32 +1,39 @@
-import './style.css';
-import './../node_modules/@fortawesome/fontawesome-free/css/all.css';
+import "./style.css";
+import "./../node_modules/@fortawesome/fontawesome-free/css/all.css";
 
-let container = document.querySelector('.s-slider'),
-  track = document.createElement('div');
+let container = document.querySelector(".s-slider"),
+  track = document.createElement("div");
 
 let slides;
 let slidesCount;
 let counter;
-let slideSize, posInitial, posFinal, posX1, posX2, transitionStyle;
+let slideSize,
+  posInitial,
+  posFinal,
+  posX1,
+  posX2,
+  transitionStyle,
+  rightArrow,
+  leftArrow;
 
 let allowSlide = true;
 let allowSlideRight = true;
 let allowSlideLeft = true;
 
-const stringToBoolean = (dataValue) => dataValue === 'true';
+const stringToBoolean = (dataValue) => dataValue === "true";
 
 window.onload = MySlider(track, container);
 
 function MySlider(wrapper, container) {
   container.childNodes.forEach((slide) => {
     if (slide.nodeType === 1) {
-      slide.classList.add('slide');
+      slide.classList.add("slide");
       wrapper.appendChild(slide);
     }
   });
 
-  wrapper.classList = 'carousel-track';
-  container.innerHTML = '';
+  wrapper.classList = "carousel-track";
+  container.innerHTML = "";
   container.appendChild(wrapper);
   slides = wrapper.childNodes;
   slideSize = -slides[0].clientWidth;
@@ -45,18 +52,8 @@ function MySlider(wrapper, container) {
     let firstImg = wrapper.firstElementChild.cloneNode();
     let lastImg = wrapper.lastElementChild.cloneNode();
     wrapper.appendChild(firstImg);
-    wrapper.insertAdjacentElement('afterbegin', lastImg);
+    wrapper.insertAdjacentElement("afterbegin", lastImg);
   }
-
-  const throttle = (func, limit) => {
-  let inThrottle
-  return (...args) => {
-    if (!inThrottle) {
-      func(...args)
-      inThrottle = setTimeout(() => inThrottle = false, limit)
-    }
-  }
-}
 
   if (stringToBoolean(container.dataset.arrows)) {
     toggleArrows();
@@ -70,57 +67,45 @@ function MySlider(wrapper, container) {
   if (stringToBoolean(container.dataset.keychange)) {
     arrowKeySlide();
   }
-  // if (container.dataset.transition) {
-  //   let timer = container.dataset.transition / 10000
-
-  //   changeTime(timer)
-  // }
-
-  
-
+  if (!stringToBoolean(container.dataset.infinite) && stringToBoolean(container.dataset.arrows)) {
+    leftArrow.style.display = "none";
+    console.log(container.dataset.infinite);
+  }
 
   function toggleArrows() {
-    let leftArrow = document.createElement('i');
-    leftArrow.className = 'fas fa-chevron-left';
-    leftArrow.id = 'arrow-left';
+    leftArrow = document.createElement("i");
+    leftArrow.className = "fas fa-chevron-left";
+    leftArrow.id = "arrow-left";
     container.appendChild(leftArrow);
 
-    const prevButton = document.getElementById('arrow-left');
-    prevButton.addEventListener('click', () => {
-      slidingOn('left');
+    const prevButton = document.getElementById("arrow-left");
+    prevButton.addEventListener("click", () => {
+      slidingOn("left");
     });
 
-    let rightArrow = document.createElement('i');
-    rightArrow.className = 'fas fa-chevron-right';
-    rightArrow.id = 'arrow-right';
+    rightArrow = document.createElement("i");
+    rightArrow.className = "fas fa-chevron-right";
+    rightArrow.id = "arrow-right";
     container.appendChild(rightArrow);
 
-    const nextButton = document.getElementById('arrow-right');
-    nextButton.addEventListener('click', () => {
-      (slidingOn('right'))
+    const nextButton = document.getElementById("arrow-right");
+    nextButton.addEventListener("click", () => {
+      slidingOn("right");
     });
-
-    // nextButton.addEventListener('click', throttle(function() {
-    //   return console.log('Hey! It is', new Date().toUTCString());
-    // }, 5000));
-
-      // function newDAte() {
-      //   return console.log('Hey! It is', new Date().toUTCString())
-      // }
   }
 
   function autoPlay(delay) {
     setInterval(() => {
-      slidingOn('right');
+      slidingOn("right");
     }, delay);
   }
 
   function dragSlide() {
     wrapper.onmousedown = startDrag;
 
-    wrapper.addEventListener('touchstart', startDrag);
-    wrapper.addEventListener('touchmove', moveDrag);
-    wrapper.addEventListener('touchend', endDrag);
+    wrapper.addEventListener("touchstart", startDrag);
+    wrapper.addEventListener("touchmove", moveDrag);
+    wrapper.addEventListener("touchend", endDrag);
 
     function startDrag(e) {
       e = window.event;
@@ -138,18 +123,18 @@ function MySlider(wrapper, container) {
       posX2 = posX1 - e.clientX;
       posX1 = e.clientX;
 
-      wrapper.style.left = wrapper.offsetLeft - posX2 + 'px';
+      wrapper.style.left = wrapper.offsetLeft - posX2 + "px";
     }
 
     function endDrag(e) {
       posFinal = wrapper.offsetLeft;
 
       if (posX2 >= 1) {
-        slidingOn('right', 'drag');
+        slidingOn("right", "drag");
       } else if (posX2 < 1) {
-        slidingOn('left', 'drag');
+        slidingOn("left", "drag");
       } else {
-        wrapper.style.left = posInitial + 'px';
+        wrapper.style.left = posInitial + "px";
       }
 
       document.onmouseup = null;
@@ -159,75 +144,74 @@ function MySlider(wrapper, container) {
 
   function arrowKeySlide() {
     document.addEventListener(
-      'keyup',
+      "keyup",
       (e) => {
         let keyUp = e.key;
-        if (keyUp === 'ArrowLeft') {
-          throttle(slidingOn('left'), 2000);
-        } else if (keyUp === 'ArrowRight') {
-          slidingOn('right');
+        if (keyUp === "ArrowLeft") {
+          slidingOn("left");
+        } else if (keyUp === "ArrowRight") {
+          slidingOn("right");
         }
       },
       false
     );
   }
   // creating the stylesheet for the class shifting
-  
-  
- 
 
   function changeTime(time) {
-    wrapper.style.transition = `left ${time}s ease-in-out`
+    wrapper.style.transition = `left ${time}s ease-in-out`;
   }
 
   function slidingOn(direction, action) {
-    changeTime(container.dataset.transition / 10000)
-   
+    changeTime(container.dataset.transition / 10000);
 
     if (allowSlide) {
       if (!action) {
         posInitial = wrapper.offsetLeft;
       }
-      console.log(posInitial);
-      if (direction === 'right' && allowSlideRight === true) {
-        wrapper.style.left = posInitial - -slideSize + 'px';
+
+      const lastSlide = counter === slidesCount - 1 && !infinite;
+      const firstSlide = counter <= 0 && !infinite;
+
+      if (direction === "right" && !lastSlide) {
+        wrapper.style.left = posInitial - -slideSize + "px";
         counter++;
-      } else if (direction === 'left' && allowSlideLeft === true) {
-        wrapper.style.left = posInitial - slideSize + 'px';
+        allowSlide = false;
+      } else if (direction === "left" && !firstSlide) {
+        wrapper.style.left = posInitial - slideSize + "px";
         counter--;
+        allowSlide = false;
       }
     }
-    allowSlideRight = true;
-    allowSlideLeft = true;
-    allowSlide = false
-    console.log(counter, slidesCount);
   }
 
-
-  
-  wrapper.addEventListener('transitionend', indexCheck);
+  wrapper.addEventListener("transitionend", indexCheck);
 
   function indexCheck() {
-    wrapper.style.transition = ''
-    if (infinite === true) {
-      if (counter >= slidesCount) {
-        wrapper.style.left = slideSize + 'px';
-        counter = 0;
-      } else if (counter < 0) {
-        wrapper.style.left = slidesCount * slideSize + 'px';
-        counter = slidesCount - 1;
-      }
-    } else {
-      // Needs workkkkkkkkkkkk
+    wrapper.style.transition = "";
+    if (!stringToBoolean(container.dataset.infinite) && stringToBoolean(container.dataset.arrows)) {
+      rightArrow.style.display = "block";
+      leftArrow.style.display = "block";
+    } 
+    
 
-      if (counter >= slidesCount - 1) {
-        wrapper.style.left = slidesCount * slideSize + 'px';
-        
-        allowSlideRight = false;
+    console.log(rightArrow);
+    if (counter >= slidesCount) {
+      wrapper.style.left = slideSize + "px";
+      counter = 0;
+    } else if (counter < 0) {
+      wrapper.style.left = slidesCount * slideSize + "px";
+      counter = slidesCount - 1;
+    }
+
+    if (!infinite && stringToBoolean(container.dataset.arrows)) {
+      if (counter === slidesCount - 1) {
+        rightArrow.style.display = "none";
       } else if (counter <= 0) {
-        allowSlideLeft = false;
+        leftArrow.style.display = "none";
       }
     }
+
     allowSlide = true;
   }
 }

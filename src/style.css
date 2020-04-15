@@ -43,6 +43,10 @@
   transition: left 0.4s ease-in-out;
 } */
 
+.toggleRightArrow {
+  display: none;
+}
+
 #arrow-left,
 #arrow-right {
   position: absolute;
@@ -62,9 +66,6 @@
 }
 
 #arrow-left {
- 
-  
-  
   left: 5%;
   font-size: 40px;
   color: black;
@@ -73,12 +74,11 @@
 }
 
 #arrow-right {
-  
-  
-  
   right: 5%;
   font-size: 40px;
   color: black;
   opacity: 0.5;
   cursor: pointer;
 }
+
+
