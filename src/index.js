@@ -68,7 +68,7 @@ function MySlider(wrapper, container) {
     arrowKeySlide();
   }
   if (!stringToBoolean(container.dataset.infinite) && stringToBoolean(container.dataset.arrows)) {
-    leftArrow.style.display = "none";
+    leftArrow.classList.add('toggleLeftArrow');
     console.log(container.dataset.infinite);
   }
 
@@ -190,8 +190,9 @@ function MySlider(wrapper, container) {
   function indexCheck() {
     wrapper.style.transition = "";
     if (!stringToBoolean(container.dataset.infinite) && stringToBoolean(container.dataset.arrows)) {
-      rightArrow.style.display = "block";
-      leftArrow.style.display = "block";
+      rightArrow.classList.remove('toggleRightArrow')
+      leftArrow.classList.remove('toggleLeftArrow')
+      
     } 
     
 
@@ -206,9 +207,9 @@ function MySlider(wrapper, container) {
 
     if (!infinite && stringToBoolean(container.dataset.arrows)) {
       if (counter === slidesCount - 1) {
-        rightArrow.style.display = "none";
+        rightArrow.classList.add('toggleRightArrow')
       } else if (counter <= 0) {
-        leftArrow.style.display = "none";
+        leftArrow.classList.add('toggleLeftArrow')
       }
     }
 
