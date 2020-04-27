@@ -1,6 +1,8 @@
 import "./style.css";
 import "./../node_modules/@fortawesome/fontawesome-free/css/all.css";
 
+
+
 let container = document.querySelector(".s-slider"),
   track = document.createElement("div");
 
@@ -12,13 +14,11 @@ let slideSize,
   posFinal,
   posX1,
   posX2,
-  transitionStyle,
   rightArrow,
   leftArrow;
 
 let allowSlide = true;
-let allowSlideRight = true;
-let allowSlideLeft = true;
+
 
 const stringToBoolean = (dataValue) => dataValue === "true";
 

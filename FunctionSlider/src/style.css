@@ -1,0 +1,85 @@
+* {
+  padding: 0px;
+  margin: 0px;
+  box-sizing: border-box;
+}
+
+.s-slider {
+  /* width: 150vh; */
+  position: absolute;
+  left: 25%;
+  width: 50%;
+  border: 5px solid black;
+  overflow: hidden;
+}
+
+.carousel-track {
+  display: flex;
+  position: relative;
+  left: -100%;
+  top: 0;
+  /* transition: transform 0.4s ease-in-out; */
+}
+
+.carousel-track img {
+  width: 100%;
+  height: 580px;
+  object-fit: fill;
+}
+
+.slide {
+  cursor: pointer;
+  float: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 1s;
+  position: relative;
+  background: #ffcf47;
+}
+
+/* .shifting {
+  transition: left 0.4s ease-in-out;
+} */
+
+
+
+
+#arrow-left,
+#arrow-right {
+  position: absolute;
+
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  border-radius: 5px;
+  margin-top: -20px;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+  text-align: center;
+}
+
+ 
+
+#arrow-left {
+  left: 5%;
+  font-size: 40px;
+  color: black;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+#arrow-right {
+  right: 5%;
+  font-size: 40px;
+  color: black;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+
+i.toggleRightArrow, i.toggleLeftArrow {
+ 
+  display: none;
+}
