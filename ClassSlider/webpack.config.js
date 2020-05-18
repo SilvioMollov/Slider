@@ -30,6 +30,14 @@ module.exports = {
             }
           }
         ]
+      },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: /node_modules/,
+        query: {
+          plugins: ['transform-class-properties']
+        }
       }
     ]
   }

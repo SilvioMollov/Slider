@@ -36,6 +36,7 @@ function MySlider(wrapper, container) {
   container.innerHTML = "";
   container.appendChild(wrapper);
   slides = wrapper.childNodes;
+  
   slideSize = -slides[0].clientWidth;
   let infinite = stringToBoolean(container.dataset.infinite);
 
@@ -108,6 +109,7 @@ function MySlider(wrapper, container) {
     wrapper.addEventListener("touchend", endDrag);
 
     function startDrag(e) {
+      console.log('im in')
       e = window.event;
       e.preventDefault();
       posInitial = wrapper.offsetLeft;
@@ -115,6 +117,7 @@ function MySlider(wrapper, container) {
       posX1 = e.clientX;
       document.onmouseup = endDrag;
       document.onmousemove = moveDrag;
+      console.log(e, posInitial, posX1)
     }
 
     function moveDrag(e) {
@@ -163,7 +166,7 @@ function MySlider(wrapper, container) {
   }
 
   function slidingOn(direction, action) {
-    changeTime(container.dataset.transition / 10000);
+    changeTime(container.dataset.transition / 1000);
 
     if (allowSlide) {
       if (!action) {
@@ -196,7 +199,6 @@ function MySlider(wrapper, container) {
     } 
     
 
-    console.log(rightArrow);
     if (counter >= slidesCount) {
       wrapper.style.left = slideSize + "px";
       counter = 0;
