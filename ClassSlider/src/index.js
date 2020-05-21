@@ -11,33 +11,74 @@ class MySlider {
     this.load();
   }
 
-  load = () => {
+  wrapEach = () => {
     this.track = document.createElement("div");
+
+    // this.widthCalc();
     this.container.childNodes.forEach((slide) => {
       if (slide.nodeType === 1) {
-        slide.classList.add("slide");
-        this.track.appendChild(slide);
+        this.wrappedSlide = document.createElement("div");
+        this.wrappedSlide.classList.add("slide");
+        this.wrappedSlide.appendChild(slide);
+        this.track.appendChild(this.wrappedSlide);
       }
     });
 
     this.track.classList = "carousel-track";
     this.container.innerHTML = "";
     this.container.appendChild(this.track);
+    this.cloneFirstAndLast();
+
+    this.setWidth(this.track, this.container.clientWidth);
+    this.widthCalc(this.track.childNodes, this.track);
+  };
+
+  setWidth = (el, width) => {
+    el.childNodes.forEach((slide) => {
+      slide.setAttribute("style", `width:${width}px`);
+    });
+  };
+
+  cloneFirstAndLast = () => {
+    const firstSlide = this.track.firstElementChild.cloneNode(true);
+    const lastSlide = this.track.lastElementChild.cloneNode(true);
+    this.track.appendChild(firstSlide);
+    this.track.insertAdjacentElement("afterbegin", lastSlide);
+  };
+
+  // wrapAll = (nodes, wrapper) => {
+  //   const parent = nodes[0].parentNode;
+  //   let prevSibling = nodes[0].previousSibling;
+
+  //   for (let i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
+  //     wrapper.appendChild(nodes[i]);
+  //   }
+  //   let nextSibling = prevSibling ? prevSibling.nextSibling : parent.firstChild;
+  //   parent.insertBefore(wrapper, nextSibling);
+
+  //   return wrapper;
+  // };
+
+  load = () => {
+    this.wrapEach();
+
     this.allowSlide = true;
     this.slides = this.track.childNodes;
 
     this.slideSize = -this.slides[0].clientWidth;
     this.boundary = (this.slideSize / 100) * 40;
     this.slidesCount = this.slides.length;
-    this.counter = 0;
+    this.counter = 1;
     this.allowSlide = true;
     this.allowDrag = true;
     this.configuration();
 
-    this.cloneFirstAndLast();
+    // this.imgWrap = document.createElement('div')
+    // this.wrapAll(this.slides, this.imgWrap)
     this.track.addEventListener("transitionend", this.indexCheck);
     window.addEventListener("resize", this.resizing);
-    this.widthCalc(this.slides)
+
+    console.log(this.slides)
   };
 
   static defaultConfig = {
@@ -56,37 +97,36 @@ class MySlider {
     this.config.arrowsChange && this.arrowKeySlide();
     this.config.slide && this.dragSlide();
     !this.config.infinite && this.leftArrow.classList.add("toggleLeftArrow");
-    
   };
 
   resizing = () => {
-    this.slides = this.track.childNodes
+    this.setWidth(this.track, this.container.clientWidth);
+    this.widthCalc(this.track.childNodes, this.track);
+
+    this.slides = this.track.childNodes;
     this.slideSize = -this.slides[0].clientWidth;
-    
-    this.posInitialPre = this.track.offsetLeft
+
+    this.posInitialPre = this.track.offsetLeft;
     this.boundary = (this.slideSize / 100) * 40;
-    console.log(this.boundary)
 
-    // this.track.style.left = this.slideSize * this.counter + "px";
-    console.log()
-    console.log("resizing", this.slideSize, this.track.clientWidth, this.counter);
-  }; 
+    this.track.style.left = this.slideSize * this.counter + "px";
+  };
 
-  sumFun = (a , b) =>{
-    return a + b
-  }
-
-  widthCalc = (arg) => {
+  widthCalc = (el, elWidth) => {
     let total = 0;
-    arg.forEach(slide => {
-      total += slide.clientWidth
-    })
-    console.log(total)
-    this.track.style.width = `${total}px`
-  }
+    el.forEach((slide) => {
+      let p = slide.style.width;
+      let pi = p.replace("px", " ");
+      let pa = parseInt(pi);
+
+      total += pa;
+    });
+
+    elWidth.style.width = `${total}px`;
+  };
 
   // centerPos = (pos) => {
-    
+
   // }
 
   autoPlay = (delay) => {
@@ -99,14 +139,12 @@ class MySlider {
     this.changeTime(this.config.transition / 1000);
     if (this.allowSlide) {
       if (!action) {
-    
         this.posInitial = this.track.offsetLeft;
-    
       }
 
       const lastSlide =
         this.counter === this.slidesCount - 1 && !this.config.infinite;
-      const firstSlide = this.counter <= 0 && !this.config.infinite;
+      const firstSlide = this.counter <= 1 && !this.config.infinite;
 
       if (direction === "right" && !lastSlide) {
         this.track.style.left = this.posInitial - -this.slideSize + "px";
@@ -124,13 +162,10 @@ class MySlider {
       // this.posFinal = pa
 
       // this.posFinal = this.posInitial + this.slideSize
-      
-      console.log( "slidnig ", this.posInitial)
     }
   };
 
   toggleArrows = () => {
-    console.log("im in");
     this.leftArrow = document.createElement("i");
     this.leftArrow.className = "fas fa-chevron-left";
     this.leftArrow.id = "arrow-left";
@@ -153,7 +188,6 @@ class MySlider {
   };
 
   indexCheck = () => {
-    console.log("end trans");
     this.track.style.transition = "";
     if (!this.config.infinite && this.config.arrowsShow) {
       this.rightArrow.classList.remove("toggleRightArrow");
@@ -161,30 +195,26 @@ class MySlider {
     }
 
     // console.log(rightArrow);
-    if (this.counter >= this.slidesCount) {
+
+    if (this.counter >= this.slidesCount - 1) {
       this.track.style.left = this.slideSize + "px";
-      this.counter = 0;
-    } else if (this.counter < 0) {
-      this.track.style.left = this.slidesCount * this.slideSize + "px";
-      this.counter = this.slidesCount - 1;
+      this.counter = 1;
+    } else if (this.counter < 1) {
+      this.track.style.left = (this.slidesCount - 2) * this.slideSize + "px";
+      this.counter = this.slidesCount - 2;
     }
+
+    
 
     if (!this.config.infinite && this.config.arrowsShow) {
       if (this.counter === this.slidesCount - 1) {
         this.rightArrow.classList.add("toggleRightArrow");
-      } else if (this.counter <= 0) {
+      } else if (this.counter <= 1) {
         this.leftArrow.classList.add("toggleLeftArrow");
       }
     }
     this.allowSlide = true;
     this.allowDrag = true;
-  };
-
-  cloneFirstAndLast = () => {
-    const firstImg = this.track.firstElementChild.cloneNode();
-    const lastImg = this.track.lastElementChild.cloneNode();
-    this.track.appendChild(firstImg);
-    this.track.insertAdjacentElement("afterbegin", lastImg);
   };
 
   changeTime = (time) => {
@@ -199,6 +229,9 @@ class MySlider {
   startDrag = (e) => {
     e.preventDefault();
     this.posInitial = this.track.offsetLeft;
+    console.log(e.type)
+
+    console.log(this.allowDrag)
 
     if (this.allowDrag) {
       if (e.type === "touchstart") {
@@ -206,10 +239,13 @@ class MySlider {
         this.track.addEventListener("touchmove", this.moveDrag);
         this.track.addEventListener("touchend", this.endDrag);
       } else {
+        console.log(" im in START")
         this.prevMousePositionX = e.clientX;
+        
         this.track.addEventListener("mousemove", this.moveDrag);
         this.track.addEventListener("mouseup", this.endDrag);
         this.track.addEventListener("mouseout", this.endDrag);
+        console.log( "WATCH FOR END ", e.type )
       }
     }
 
@@ -220,8 +256,10 @@ class MySlider {
     const boundaryLeft = this.container.getBoundingClientRect().left;
     const boundaryRight =
       boundaryLeft + this.container.getBoundingClientRect().width;
-
+      console.log(e.type)
     if (e.type === "touchmove") {
+      console.log( " im in T-move")
+
       this.mouseDirectionX = this.prevMousePositionX - e.touches[0].clientX;
       this.prevMousePositionX = e.touches[0].clientX;
 
@@ -233,6 +271,7 @@ class MySlider {
         return;
       }
     } else if (e.type === "mousemove") {
+      console.log( " im in M-move")
       this.mouseDirectionX = this.prevMousePositionX - e.clientX;
       this.prevMousePositionX = e.clientX;
     }
@@ -243,7 +282,7 @@ class MySlider {
       this.mouseDirectionX >= 0;
 
     const stopLeft =
-      this.counter === 0 && !this.config.infinite && this.mouseDirectionX < 0;
+      this.counter === 1 && !this.config.infinite && this.mouseDirectionX < 0;
 
     if (stopRight || stopLeft) {
       this.allowDrag = true;
@@ -254,9 +293,12 @@ class MySlider {
       this.track.removeEventListener("mouseup", this.endDrag);
       this.track.removeEventListener("mouseout", this.endDrag);
     } else {
+      console.log("im in else")
       this.track.style.left =
         this.track.offsetLeft - this.mouseDirectionX + "px";
     }
+
+    console.log(this.track.style.left)
   };
 
   endDrag = (e) => {
@@ -264,11 +306,10 @@ class MySlider {
 
     posFinal = track.offsetLeft;
 
+    console.log(e.type)
     if (posFinal === posInitial) {
       this.allowDrag = true;
     }
-
-    console.log(posFinal - posInitial, this.boundary);
 
     if (e.type === "touchend" || e.type === "touchmove") {
       if (posFinal - posInitial < this.boundary) {
@@ -280,11 +321,13 @@ class MySlider {
         track.style.left = posInitial + "px";
       }
     } else if (e.type === "mouseup" || e.type === "mouseout") {
+      console.log("MOUSEUP")
       if (posFinal - posInitial < this.boundary) {
         this.slidingOn("right", "drag");
       } else if (posFinal - posInitial > -this.boundary) {
         this.slidingOn("left", "drag");
       } else {
+        console.log("MOUSEUP2")
         this.changeTime(this.config.transition / 1000);
         track.style.left = posInitial + "px";
       }
@@ -315,7 +358,7 @@ class MySlider {
 }
 
 let s = new MySlider(".s-slider", {
-  slide: false,
+  slide: true,
   infinite: true,
   autoplay: false,
   arrowsShow: true,
