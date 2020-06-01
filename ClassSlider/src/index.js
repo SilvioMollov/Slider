@@ -2,16 +2,72 @@ import "./style.css";
 import "./../node_modules/@fortawesome/fontawesome-free/css/all.css";
 
 class MySlider {
-  constructor(selector = ".s-slider", config = MySlider.defaultConfig) {
-    this.container = document.querySelector(selector);
+  constructor(container) {
+    this.container = container;
+    const config = { attributes: true, childList: true, subtree: true };
 
-    this.config = config;
-    this.mergeConf = { ...MySlider.defaultConfig, ...this.config };
-    console.log(config, MySlider.defaultConfig, this.mergeConf.autoplay)
+    const callback = function(mutationsList, observer) {
+      // Use traditional 'for loops' for IE 11
+      for(let mutation of mutationsList) {
+        console.log(mutation)
+          if (mutation.type === 'childList') {
+              
+              console.log('A child node has been added or removed.');
+          }
+          else if (mutation.type === 'attributes') {
+              console.log('The ' + mutation.attributeName + ' attribute was modified.');
+          }
+      }
+  };
+
+  const observer = new MutationObserver(callback)
+
+  observer.observe(this.container, config)
+    
+    this.userConfig = { 
+      autoplay: this.container.dataset.autoplay === undefined ? MySlider.defaultConfig.autoplay : this.stringToBoolean(this.container.autoplay),
+      autoplayTrans: this.container.dataset.autoplaytrans === undefined ? MySlider.defaultConfig.autoplayTrans : parseInt(this.container.dataset.autoplaytrans),
+      arrowsShow: this.container.dataset.arrowsshow === undefined ? MySlider.defaultConfig.arrowsShow : this.stringToBoolean(this.container.dataset.arrowsshow),
+      // arrowsShow: this.container.dataset.arrowsshow === undefined ? delete this.config.arrowsShow : this.stringToBoolean(this.container.arrowsshow),
+      arrowsChange: this.container.dataset.arrowschange === undefined ? MySlider.defaultConfig.arrowsChange : this.stringToBoolean(this.container.dataset.arrowschange),
+      transition: this.container.dataset.transition === undefined ? MySlider.defaultConfig.transition : parseInt(this.container.dataset.transition),
+      infinite: this.container.dataset.infinite === undefined ? MySlider.defaultConfig.infinite : this.stringToBoolean(this.container.dataset.infinite),
+      slide: this.container.dataset.slide === undefined ? MySlider.defaultConfig.slide : this.stringToBoolean(this.container.dataset.slide)
+    };
+    // this.cheker(this.config)
+
+    // this.config = { ...MySlider.defaultConfig, ...this.config };
+    console.log(MySlider.defaultConfig, this.userConfig);
+    
     this.load();
+
+
   }
 
-  wrapEach = () => {
+
+  // cheker=( from) => {
+  //   for (let el in from) {
+  //     console.log("before",el)
+  //     if ( el === undefined) {
+  //       delete from.el
+  //     }
+  //     console.log("after", el)
+  //   }
+  // }
+
+  stringToBoolean = (value) => value === 'true' 
+
+  static defaultConfig = {
+    autoplay: true,
+    autoplayTrans: 2000,
+    arrowsShow: true,
+    arrowsChange: true,
+    transition: 2000,
+    infinite: true,
+    slide: false,
+  };
+
+  wrapEachChild = () => {
     this.track = document.createElement("div");
 
     // this.widthCalc();
@@ -24,27 +80,46 @@ class MySlider {
       }
     });
 
-    console.log(MySlider.defaultConfig)
     this.track.classList = "carousel-track";
     this.container.innerHTML = "";
     this.container.appendChild(this.track);
     this.cloneFirstAndLast();
 
-    console.log(this.container)
-    console.log(this.container.clientWidth);
-
+    // this.container.onloadend = this.calcSlideWidth(this.track, this.container.clientWidth);
+    // this.track.onloadend = this.calcTrackWidth(this.track.childNodes, this.track);
     
-    this.setWidth(this.track, this.container.clientWidth);
-    this.widthCalc(this.track.childNodes, this.track);
+    // setTimeout(() => {
+    //   // this.calcSlideWidth(this.track, this.container.clientWidth);    
+    // },1)
+    
+
+    setTimeout(() => {
+      this.updateWidth()
+      // this.calcTrackWidth(this.track.childNodes, this.track);
+    },1)
   };
 
-  setWidth = (el, width) => {
+  calcTrackWidth = (el, elWidth) => {
+    let total = 0;
+    el.forEach((slide) => {
+      let p = slide.style.width;
+      
+      let pi = parseInt(p.replace("px", " "))
+      
+
+      total += pi;
+    });
+
+    elWidth.style.width = `${total}px`;
+    
+  };
+
+  calcSlideWidth = (el, width) => {
     el.childNodes.forEach((slide) => {
+
       slide.setAttribute("style", `width:${width}px`);
     });
-     if (width === this.container.clientWidth ) {
-       console.log("same")
-     }
+    
   };
 
   cloneFirstAndLast = () => {
@@ -68,12 +143,13 @@ class MySlider {
   // };
 
   load = () => {
-    this.wrapEach();
+    this.wrapEachChild();
 
     this.allowSlide = true;
     this.slides = this.track.childNodes;
 
     this.slideSize = -this.slides[0].clientWidth;
+    
     this.boundary = (this.slideSize / 100) * 40;
     this.slidesCount = this.slides.length - 2;
     this.counter = 1;
@@ -84,53 +160,44 @@ class MySlider {
     // this.imgWrap = document.createElement('div')
     // this.wrapAll(this.slides, this.imgWrap)
     this.track.addEventListener("transitionend", this.indexCheck);
-    window.addEventListener("resize", this.resizing);
+    window.addEventListener("resize", this.updateWidth);
+
+
+    
+
+
+    
   };
 
-  static defaultConfig = {
-    autoplay: true,
-    autoplayTrans: 2000,
-    arrowsShow: true,
-    arrowsChange: true,
-    transition: 2000,
-    infinite: true,
-    slide: false,
-  };
+
+  
 
   configuration = () => {
-    this.mergeConf.autoplay && this.autoPlay(this.mergeConf.autoplayTrans);
-    this.mergeConf.arrowsShow && this.toggleArrows();
-    this.mergeConf.arrowsChange && this.arrowKeySlide();
-    this.mergeConf.slide && this.dragSlide();
-    console.log(this.mergeConf.arrowsShow)
-    !this.mergeConf.infinite && this.leftArrow.classList.add("toggleLeftArrow");
+    this.userConfig.autoplay &&  this.autoPlay(this.userConfig.autoplayTrans);
+    this.userConfig.arrowsShow && this.toggleArrows();
+    this.userConfig.arrowsChange && this.arrowKeySlide();
+    this.userConfig.slide && this.dragSlide();
+
+    !this.userConfig.infinite && this.userConfig.arrowsShow && this.leftArrow.classList.add("toggleLeftArrow");
   };
 
-  resizing = () => {
-    this.setWidth(this.track, this.container.clientWidth);
-    this.widthCalc(this.track.childNodes, this.track);
+  updateWidth = () => {
+    
+
+    
+    this.calcSlideWidth(this.track, this.container.clientWidth);
+    this.calcTrackWidth(this.track.childNodes, this.track);
 
     this.slides = this.track.childNodes;
     this.slideSize = -this.slides[0].clientWidth;
 
     this.posInitialPre = this.track.offsetLeft;
     this.boundary = (this.slideSize / 100) * 40;
-
+    
     this.track.style.left = this.slideSize * this.counter + "px";
   };
 
-  widthCalc = (el, elWidth) => {
-    let total = 0;
-    el.forEach((slide) => {
-      let p = slide.style.width;
-      let pi = p.replace("px", " ");
-      let pa = parseInt(pi);
-
-      total += pa;
-    });
-
-    elWidth.style.width = `${total}px`;
-  };
+  
 
   // centerPos = (pos) => {
 
@@ -143,16 +210,15 @@ class MySlider {
   };
 
   slidingOn = (direction, action) => {
-    console.log("IM IN SLIDING");
-    this.changeTime(this.mergeConf.transition / 1000);
+    this.changeTime(this.userConfig.transition / 1000);
     if (this.allowSlide) {
       if (!action) {
         this.posInitial = this.track.offsetLeft;
       }
 
       const lastSlide =
-        this.counter === this.slidesCount && !this.mergeConf.infinite;
-      const firstSlide = this.counter <= 1 && !this.mergeConf.infinite;
+        this.counter === this.slidesCount && !this.userConfig.infinite;
+      const firstSlide = this.counter <= 1 && !this.userConfig.infinite;
 
       if (direction === "right" && !lastSlide) {
         this.track.style.left = this.posInitial - -this.slideSize + "px";
@@ -166,7 +232,7 @@ class MySlider {
       // const p = this.track.style.left
       // const pi = p.replace('px'," ")
       // const pa = parseInt(pi)
-      console.log(this.counter, this.slidesCount);
+
       // this.posFinal = pa
 
       // this.posFinal = this.posInitial + this.slideSize
@@ -174,19 +240,16 @@ class MySlider {
   };
 
   toggleArrows = () => {
-    console.log("IM in ")
     this.leftArrow = document.createElement("i");
     this.leftArrow.className = "fas fa-chevron-left";
     this.leftArrow.id = "arrow-left";
     this.container.appendChild(this.leftArrow);
-   
+
     this.prevButton = this.container.querySelector("#arrow-left");
 
     this.prevButton.addEventListener("click", () => {
       this.slidingOn("left");
     });
-
-    
 
     this.rightArrow = document.createElement("i");
     this.rightArrow.className = "fas fa-chevron-right";
@@ -202,12 +265,11 @@ class MySlider {
 
   indexCheck = () => {
     this.track.style.transition = "";
-    if (!this.mergeConf.infinite && this.mergeConf.arrowsShow) {
+    if (!this.userConfig.infinite && this.userConfig.arrowsShow) {
       this.rightArrow.classList.remove("toggleRightArrow");
       this.leftArrow.classList.remove("toggleLeftArrow");
     }
 
-    // console.log(rightArrow);
 
     if (this.counter > this.slidesCount) {
       this.track.style.left = this.slideSize + "px";
@@ -217,7 +279,7 @@ class MySlider {
       this.counter = this.slidesCount;
     }
 
-    if (!this.mergeConf.infinite && this.mergeConf.arrowsShow) {
+    if (!this.userConfig.infinite && this.userConfig.arrowsShow) {
       if (this.counter === this.slidesCount) {
         this.rightArrow.classList.add("toggleRightArrow");
       } else if (this.counter <= 1) {
@@ -225,7 +287,6 @@ class MySlider {
       }
     }
 
-    console.log("TransEND", this.counter, this.slidesCount);
     this.allowSlide = true;
     this.allowDrag = true;
   };
@@ -265,7 +326,6 @@ class MySlider {
   };
 
   moveDrag = (e) => {
-    // console.log(e.type)
     this.akoSumMrudnal = true;
 
     const boundaryLeft = this.container.getBoundingClientRect().left;
@@ -288,16 +348,15 @@ class MySlider {
     } else if (e.type === "mousemove") {
       mouseDirectionX = this.prevMousePositionX - e.clientX;
       this.prevMousePositionX = e.clientX;
-      // console.log(this.prevMousePositionX)
     }
 
     const stopRight =
       this.counter === this.slidesCount &&
-      !this.mergeConf.infinite &&
+      !this.userConfig.infinite &&
       mouseDirectionX >= 0;
 
     const stopLeft =
-      this.counter === 1 && !this.mergeConf.infinite && mouseDirectionX < 0;
+      this.counter === 1 && !this.userConfig.infinite && mouseDirectionX < 0;
 
     if (stopRight || stopLeft) {
       this.allowDrag = true;
@@ -313,7 +372,6 @@ class MySlider {
   };
 
   endDrag = (e) => {
-    console.log(e.type, this.allowDrag);
     let { posInitial, posFinal, track, mouseDirectionX } = this;
 
     posFinal = track.offsetLeft;
@@ -328,7 +386,7 @@ class MySlider {
       } else if (posFinal - posInitial > -this.boundary) {
         this.slidingOn("left", "drag");
       } else {
-        this.changeTime(this.mergeConf.transition / 1000);
+        this.changeTime(this.userConfig.transition / 1000);
         track.style.left = posInitial + "px";
       }
     } else if (e.type === "mouseup" || e.type === "mouseout") {
@@ -337,12 +395,10 @@ class MySlider {
       } else if (posFinal - posInitial > -this.boundary) {
         this.slidingOn("left", "drag");
       } else {
-        console.log("IM IN ELSE END");
         if (this.akoSumMrudnal) {
-          this.changeTime(this.mergeConf.transition / 1000);
+          this.changeTime(this.userConfig.transition / 1000);
         }
         track.style.left = posInitial + "px";
-        console.log(posInitial);
       }
     }
 
@@ -382,10 +438,9 @@ class MySlider {
 
 // Automatic
 function createSliders() {
-  document.querySelectorAll('.s-slider').forEach(el => {
-    console.log(el)
-    new MySlider(".s-slider", {autoplay: false, slide:true, transition:1000})
-  })
+  document.querySelectorAll(".s-slider").forEach((el) => {
+     new MySlider(el);
+  });
 }
 
 createSliders();
