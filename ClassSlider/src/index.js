@@ -4,58 +4,95 @@ import "./../node_modules/@fortawesome/fontawesome-free/css/all.css";
 class MySlider {
   constructor(container) {
     this.container = container;
-    const config = { attributes: true, childList: true, subtree: true };
 
-    const callback = function(mutationsList, observer) {
-      // Use traditional 'for loops' for IE 11
-      for(let mutation of mutationsList) {
-        console.log(mutation)
-          if (mutation.type === 'childList') {
-              
-              console.log('A child node has been added or removed.');
-          }
-          else if (mutation.type === 'attributes') {
-              console.log('The ' + mutation.attributeName + ' attribute was modified.');
-          }
-      }
-  };
+    this.configurationData();
 
-  const observer = new MutationObserver(callback)
+    this.mutationObserverMethod(this.container);
 
-  observer.observe(this.container, config)
-    
-    this.userConfig = { 
-      autoplay: this.container.dataset.autoplay === undefined ? MySlider.defaultConfig.autoplay : this.stringToBoolean(this.container.autoplay),
-      autoplayTrans: this.container.dataset.autoplaytrans === undefined ? MySlider.defaultConfig.autoplayTrans : parseInt(this.container.dataset.autoplaytrans),
-      arrowsShow: this.container.dataset.arrowsshow === undefined ? MySlider.defaultConfig.arrowsShow : this.stringToBoolean(this.container.dataset.arrowsshow),
-      // arrowsShow: this.container.dataset.arrowsshow === undefined ? delete this.config.arrowsShow : this.stringToBoolean(this.container.arrowsshow),
-      arrowsChange: this.container.dataset.arrowschange === undefined ? MySlider.defaultConfig.arrowsChange : this.stringToBoolean(this.container.dataset.arrowschange),
-      transition: this.container.dataset.transition === undefined ? MySlider.defaultConfig.transition : parseInt(this.container.dataset.transition),
-      infinite: this.container.dataset.infinite === undefined ? MySlider.defaultConfig.infinite : this.stringToBoolean(this.container.dataset.infinite),
-      slide: this.container.dataset.slide === undefined ? MySlider.defaultConfig.slide : this.stringToBoolean(this.container.dataset.slide)
-    };
-    // this.cheker(this.config)
-
-    // this.config = { ...MySlider.defaultConfig, ...this.config };
     console.log(MySlider.defaultConfig, this.userConfig);
-    
-    this.load();
 
+    this.wrapEachChild();
+    this.allowSlide = true;
 
+    this.allowDrag = true;
+    this.permissionsAndListeners();
+    // this.updateOffset()
   }
 
+  mutationObserverMethod = (target) => {
+    const callback = (mutationsList, observer) => {
+      // Use traditional 'for loops' for IE 11
+      for (let mutation of mutationsList) {
+        if (mutation.addedNodes[0] === this.track) {
+          this.calcSlideWidth(this.track, this.container.clientWidth);
+        }
 
-  // cheker=( from) => {
-  //   for (let el in from) {
-  //     console.log("before",el)
-  //     if ( el === undefined) {
-  //       delete from.el
-  //     }
-  //     console.log("after", el)
-  //   }
-  // }
+        if (mutation.addedNodes[0]) {
+          if (mutation.addedNodes[0].className === "slide firstClone") {
+            // this.updateOffset();
+          }
+        }
 
-  stringToBoolean = (value) => value === 'true' 
+        if (
+          mutation.type === "attributes" &&
+          mutation.target.className === "slide lastClone"
+        ) {
+          this.permissionsAndListeners();
+          this.calcTrackWidth(this.track.childNodes, this.track);
+          // this.slideSize = -mutation.target.clientWidt;
+        }
+      }
+    };
+
+    this.observer = new MutationObserver(callback);
+
+    this.observer.observe(target, this.config);
+
+    this.observer.takeRecords();
+  };
+
+  configurationData = () => {
+    this.config = {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      attributeOldValue: true,
+      characterDataOldValue: true,
+    };
+
+    this.userConfig = {
+      autoplay:
+        this.container.dataset.autoplay === undefined
+          ? MySlider.defaultConfig.autoplay
+          : this.stringToBoolean(this.container.autoplay),
+      autoplayTrans:
+        this.container.dataset.autoplaytrans === undefined
+          ? MySlider.defaultConfig.autoplayTrans
+          : parseInt(this.container.dataset.autoplaytrans),
+      arrowsShow:
+        this.container.dataset.arrowsshow === undefined
+          ? MySlider.defaultConfig.arrowsShow
+          : this.stringToBoolean(this.container.dataset.arrowsshow),
+      arrowsChange:
+        this.container.dataset.arrowschange === undefined
+          ? MySlider.defaultConfig.arrowsChange
+          : this.stringToBoolean(this.container.dataset.arrowschange),
+      transition:
+        this.container.dataset.transition === undefined
+          ? MySlider.defaultConfig.transition
+          : parseInt(this.container.dataset.transition),
+      infinite:
+        this.container.dataset.infinite === undefined
+          ? MySlider.defaultConfig.infinite
+          : this.stringToBoolean(this.container.dataset.infinite),
+      slide:
+        this.container.dataset.slide === undefined
+          ? MySlider.defaultConfig.slide
+          : this.stringToBoolean(this.container.dataset.slide),
+    };
+  };
+
+  stringToBoolean = (value) => value === "true";
 
   static defaultConfig = {
     autoplay: true,
@@ -70,7 +107,6 @@ class MySlider {
   wrapEachChild = () => {
     this.track = document.createElement("div");
 
-    // this.widthCalc();
     this.container.childNodes.forEach((slide) => {
       if (slide.nodeType === 1) {
         this.wrappedSlide = document.createElement("div");
@@ -85,123 +121,83 @@ class MySlider {
     this.container.appendChild(this.track);
     this.cloneFirstAndLast();
 
-    // this.container.onloadend = this.calcSlideWidth(this.track, this.container.clientWidth);
-    // this.track.onloadend = this.calcTrackWidth(this.track.childNodes, this.track);
-    
-    // setTimeout(() => {
-    //   // this.calcSlideWidth(this.track, this.container.clientWidth);    
-    // },1)
-    
+    this.slides = this.track.childNodes;
+    this.slidesCount = this.slides.length - 2;
+    this.counter = 1;
 
-    setTimeout(() => {
-      this.updateWidth()
-      // this.calcTrackWidth(this.track.childNodes, this.track);
-    },1)
+    this.configurationSetter();
   };
 
   calcTrackWidth = (el, elWidth) => {
     let total = 0;
     el.forEach((slide) => {
       let p = slide.style.width;
-      
-      let pi = parseInt(p.replace("px", " "))
-      
+
+      let pi = parseInt(p.replace("px", " "));
 
       total += pi;
     });
 
     elWidth.style.width = `${total}px`;
-    
   };
+
+  // updateOffset = () => {
+  //   console.log(this.slideSize);
+  // };
 
   calcSlideWidth = (el, width) => {
     el.childNodes.forEach((slide) => {
-
       slide.setAttribute("style", `width:${width}px`);
     });
-    
+
+    this.slideSize = -width;
+    this.boundary = (this.slideSize / 100) * 40;
+    this.track.style.left = this.slideSize * this.counter + "px";
   };
 
   cloneFirstAndLast = () => {
-    const firstSlide = this.track.firstElementChild.cloneNode(true);
-    const lastSlide = this.track.lastElementChild.cloneNode(true);
-    this.track.appendChild(firstSlide);
-    this.track.insertAdjacentElement("afterbegin", lastSlide);
+    const lastClone = this.track.firstElementChild.cloneNode(true);
+    const firstClone = this.track.lastElementChild.cloneNode(true);
+    this.track.appendChild(lastClone);
+    lastClone.classList.add("lastClone");
+    this.track.insertAdjacentElement("afterbegin", firstClone);
+    firstClone.classList.add("firstClone");
   };
 
-  // wrapAll = (nodes, wrapper) => {
-  //   const parent = nodes[0].parentNode;
-  //   let prevSibling = nodes[0].previousSibling;
+  permissionsAndListeners = () => {
+    // this.slides = this.track.childNodes; //goes into WrapEach
 
-  //   for (let i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
-  //     wrapper.appendChild(nodes[i]);
-  //   }
-  //   let nextSibling = prevSibling ? prevSibling.nextSibling : parent.firstChild;
-  //   parent.insertBefore(wrapper, nextSibling);
+    // this.slideSize = -this.slides[0].clientWidth; // goes in calcSlideWidth
 
-  //   return wrapper;
-  // };
-
-  load = () => {
-    this.wrapEachChild();
-
-    this.allowSlide = true;
-    this.slides = this.track.childNodes;
-
-    this.slideSize = -this.slides[0].clientWidth;
+    // this.boundary = (this.slideSize / 100) * 40; // goes in calcSlideWidth
+    // this.slidesCount = this.slides.length - 2; // goes in WrapEach
     
-    this.boundary = (this.slideSize / 100) * 40;
-    this.slidesCount = this.slides.length - 2;
-    this.counter = 1;
-    this.allowSlide = true;
-    this.allowDrag = true;
-    this.configuration();
 
-    // this.imgWrap = document.createElement('div')
-    // this.wrapAll(this.slides, this.imgWrap)
     this.track.addEventListener("transitionend", this.indexCheck);
-    window.addEventListener("resize", this.updateWidth);
+    window.addEventListener("resize",() => {
+      setTimeout(this.updateWidth, 1)
+    })
 
-
-    
-
-
-    
+    // this.calcTrackWidth(this.track.childNodes, this.track);
   };
 
-
-  
-
-  configuration = () => {
-    this.userConfig.autoplay &&  this.autoPlay(this.userConfig.autoplayTrans);
+  configurationSetter = () => {
+    this.userConfig.autoplay && this.autoPlay(this.userConfig.autoplayTrans);
     this.userConfig.arrowsShow && this.toggleArrows();
     this.userConfig.arrowsChange && this.arrowKeySlide();
     this.userConfig.slide && this.dragSlide();
 
-    !this.userConfig.infinite && this.userConfig.arrowsShow && this.leftArrow.classList.add("toggleLeftArrow");
+    !this.userConfig.infinite &&
+      this.userConfig.arrowsShow &&
+      this.leftArrow.classList.add("toggleLeftArrow");
   };
 
   updateWidth = () => {
-    
-
-    
     this.calcSlideWidth(this.track, this.container.clientWidth);
+
     this.calcTrackWidth(this.track.childNodes, this.track);
-
-    this.slides = this.track.childNodes;
-    this.slideSize = -this.slides[0].clientWidth;
-
-    this.posInitialPre = this.track.offsetLeft;
-    this.boundary = (this.slideSize / 100) * 40;
-    
-    this.track.style.left = this.slideSize * this.counter + "px";
+    // this.updateOffset();
   };
-
-  
-
-  // centerPos = (pos) => {
-
-  // }
 
   autoPlay = (delay) => {
     setInterval(() => {
@@ -211,6 +207,7 @@ class MySlider {
 
   slidingOn = (direction, action) => {
     this.changeTime(this.userConfig.transition / 1000);
+    console.log(this.allowSlide, "before Sliding");
     if (this.allowSlide) {
       if (!action) {
         this.posInitial = this.track.offsetLeft;
@@ -224,18 +221,14 @@ class MySlider {
         this.track.style.left = this.posInitial - -this.slideSize + "px";
         this.counter++;
         this.allowSlide = false;
+
+        
       } else if (direction === "left" && !firstSlide) {
         this.track.style.left = this.posInitial - this.slideSize + "px";
         this.counter--;
         this.allowSlide = false;
       }
-      // const p = this.track.style.left
-      // const pi = p.replace('px'," ")
-      // const pa = parseInt(pi)
-
-      // this.posFinal = pa
-
-      // this.posFinal = this.posInitial + this.slideSize
+      console.log(this.allowSlide, "SLIDING ON");
     }
   };
 
@@ -270,7 +263,6 @@ class MySlider {
       this.leftArrow.classList.remove("toggleLeftArrow");
     }
 
-
     if (this.counter > this.slidesCount) {
       this.track.style.left = this.slideSize + "px";
       this.counter = 1;
@@ -286,9 +278,10 @@ class MySlider {
         this.leftArrow.classList.add("toggleLeftArrow");
       }
     }
-
+    console.log(this.allowSlide, "Before indexCheck");
     this.allowSlide = true;
     this.allowDrag = true;
+    console.log(this.allowSlide, "After IndexCheck");
   };
 
   changeTime = (time) => {
@@ -439,8 +432,8 @@ class MySlider {
 // Automatic
 function createSliders() {
   document.querySelectorAll(".s-slider").forEach((el) => {
-     new MySlider(el);
+    new MySlider(el);
   });
 }
 
-createSliders();
+document.onload = createSliders();
